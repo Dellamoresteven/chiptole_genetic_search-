@@ -60,7 +60,7 @@ func newTraveler(dna []Store) Traveler {
 }
 
 const (
-	numGames     = 100 // Number of games to be played
+	numGames     = 500 // Number of games to be played
 	population   = 100 // Number of Travelers
 	mutationRate = .05 // Mutation rate of the dna of travelers
 )
@@ -143,7 +143,7 @@ func playGame(t *Traveler, wg *sync.WaitGroup) {
 		t.numStores[newStore] = true
 		oldStore = newStore
 	}
-	t.score = float64(len(t.numStores)) + (1 / t.distance)
+	t.score = float64(len(t.numStores)) + float64(1/t.distance)
 }
 
 func breedNextGeneration() {
