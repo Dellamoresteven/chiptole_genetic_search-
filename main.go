@@ -1,5 +1,9 @@
 package main
 
+/**
+ * @author Steven Dellamore
+ */
+
 /*
 Notes:
 Init Travelers
@@ -15,16 +19,16 @@ Playing the game
 */
 
 import (
-	"fmt"
 	"encoding/csv"
+	"fmt"
 	"io"
 	"log"
+	"math"
+	"math/rand"
 	"os"
+	"sort"
 	"strconv"
 	"sync"
-	"math/rand"
-	"math"
-	"sort"
 	"time"
 )
 
@@ -38,29 +42,29 @@ type Store struct {
 }
 
 type Traveler struct {
-	dna 	  []Store 		 // List of stores to go to in order
+	dna       []Store        // List of stores to go to in order
 	numStores map[Store]bool // A set of stores visited. This set is unique
-	distance  float64 	     // Distance traveled 
-	score	  float64 	     // Overall score of the traveler
+	distance  float64        // Distance traveled
+	score     float64        // Overall score of the traveler
 }
 
 func newTraveler(dna []Store) Traveler {
-    var t Traveler
+	var t Traveler
 	t.numStores = make(map[Store]bool)
-	t.distance  = 0;
-	t.score     = 0
-	t.dna       = dna
-    return t
+	t.distance = 0
+	t.score = 0
+	t.dna = dna
+	return t
 }
 
 const (
-	numGames = 2     // Number of games to be played
-	population = 100   // Number of Travelers
+	numGames     = 2   // Number of games to be played
+	population   = 100 // Number of Travelers
 	mutationRate = .05 // Mutation rate of the dna of travelers
 )
 
 var travlers []Traveler // List of Travelers that will take on the chiptole world
-var stores   []Store    // The metadata of the stores read from the csv
+var stores []Store      // The metadata of the stores read from the csv
 
 func main() {
 	csvfile, err := os.Open("data/datasets_804019_1378604_chipotle_stores.csv")
@@ -81,7 +85,7 @@ func main() {
 			log.Fatal(err)
 		}
 
-		s := Store {
+		s := Store{
 			name:    record[0],
 			city:    record[1],
 			address: record[2],
@@ -95,7 +99,7 @@ func main() {
 }
 
 func startGame() {
-	initPopulation();
+	initPopulation()
 	var wg sync.WaitGroup
 	for i := 0; i < numGames; i++ {
 		fmt.Println("\n\nNEW GAME STARTED\n\n")
@@ -110,13 +114,13 @@ func startGame() {
 
 func initPopulation() {
 	s1 := rand.NewSource(time.Now().UnixNano())
-    r1 := rand.New(s1)
+	r1 := rand.New(s1)
 	for i := 0; i < population; i++ {
 		var dna []Store
-		for j := 0; j < r1.Intn(len(stores) - 1000) + 1000; j++ {
+		for j := 0; j < r1.Intn(len(stores)-1000)+1000; j++ {
 			dna = append(dna, stores[r1.Intn(len(stores))])
 		}
-		t := newTraveler(dna);
+		t := newTraveler(dna)
 		travlers = append(travlers, t)
 	}
 }
@@ -127,8 +131,8 @@ func playGame(t *Traveler, wg *sync.WaitGroup) {
 	for i := 1; i < len(t.dna); i++ {
 		newStore := t.dna[i]
 		t.distance += math.Abs((math.Sqrt(
-					  math.Pow(newStore.log - oldStore.log,2) + 
-					  math.Pow(newStore.lat - oldStore.lat,2))))
+			math.Pow(newStore.log-oldStore.log, 2) +
+				math.Pow(newStore.lat-oldStore.lat, 2))))
 		t.numStores[newStore] = true
 		oldStore = newStore
 	}
@@ -144,13 +148,13 @@ func breedNextGeneration() {
 	s1 := rand.NewSource(time.Now().UnixNano())
 	r1 := rand.New(s1)
 	travlers = travlers[:len(travlers)-3] // remove the worst 3 performing travlers
-	travlers = append(travlers, breed(travlers[r1.Intn(10) + 1], travlers[r1.Intn(10) + 1]))
-	travlers = append(travlers, breed(travlers[r1.Intn(10) + 1], travlers[r1.Intn(10) + 1]))
-	travlers = append(travlers, breed(travlers[r1.Intn(10) + 1], travlers[r1.Intn(10) + 1]))
+	travlers = append(travlers, breed(travlers[r1.Intn(10)+1], travlers[r1.Intn(10)+1]))
+	travlers = append(travlers, breed(travlers[r1.Intn(10)+1], travlers[r1.Intn(10)+1]))
+	travlers = append(travlers, breed(travlers[r1.Intn(10)+1], travlers[r1.Intn(10)+1]))
 
 	for _, t := range travlers {
 		fmt.Println(t.score)
-		t.score = 0;
+		t.score = 0
 	}
 }
 
@@ -161,9 +165,8 @@ func breed(p1, p2 Traveler) (child Traveler) {
 	if min > len(p2.dna) {
 		min = len(p2.dna)
 	}
-	crossover := min/2
-	
+	crossover := min / 2
 
-	child = newTraveler(dna);
+	child = newTraveler(dna)
 	return
 }
