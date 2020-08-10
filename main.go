@@ -2,6 +2,7 @@ package main
 
 /**
  * @author Steven Dellamore
+ * @email dellamoresteven@gmail.com
  */
 
 /*
